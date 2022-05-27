@@ -1,0 +1,184 @@
+{% extends 'layout.html' %} {% block body %}
+<!-- banner -->
+<section class="banner_w3lspvt" id="home">
+	<div class="csslider infinity" id="slider1">
+		<div class="banner-top">
+			<video src="../static/videos/Pexels Videos 2758322.mp4" autoplay muted loop></video>
+			<h1 class="text-wh" >AgroConsultant</h1>
+		</div>
+	</div>
+</section>
+<!-- //banner -->
+
+<!-- core values -->
+
+<section class="core-value py-5" style="margin-top: 15px;">
+	<div class="container py-md-4">
+		<h3 class="heading mb-sm-5 mb-4 text-center"> About Us</h3>
+		<div class="row core-grids">
+			<div class="col-lg-6 core-left">
+				<img src="/static/images/core.jpg" style="height: 500px;" class="img-fluid" alt="">
+			</div>
+			<div class="col-lg-6 core-right">
+				<h3 class="mt-4">Improving Agriculture, Improving Lives, Cultivating Crops To Make Farmers Increase
+					Profit.</h3>
+				<p class="mt-3">Previously farmers have been using traditional approach in taking complex farming decisions. But now with the modern technology we can study interconnections between multitude variables, including crop specifications, existing climate, soil type and many more and draw out some insightful knowledge out of this. With this we empower farmers to take decisions precisely, this will help grow crops sutiable to prevailing conditions also make use of fertilizers required  and predict the diseases if any.</p>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- //core values -->
+
+<!-- Products & Services -->
+<!-- <section class="blog py-5">
+	<div class="container py-md-5">
+		<h3 class="heading mb-sm-5 mb-4 text-center">Our Services</h3>
+		<div class="row blog-grids">
+			<div class="col-lg-4 col-md-6 blog-left mb-lg-0 mb-sm-5 pb-lg-0 pb-5">
+				<img
+					src="{{ url_for('static', filename='images/crop_background.jpg') }}"
+					class="img-fluid"
+					alt=""
+				/>
+				<a href="{{ url_for('crop_recommend') }}">
+					<div class="blog-info">
+						<h4>Crop</h4>
+
+						<p class="mt-2">
+							Recommendation about the type of crops to be cultivated which is
+							best suited for the respective conditions
+						</p>
+					</div>
+				</a>
+			</div>
+			<div
+				class="col-lg-4 col-md-6 blog-middle mb-lg-0 mb-sm-5 pb-lg-0 pb-md-5"
+			>
+				<img
+					src="{{ url_for('static', filename='images/s2.jpg') }}"
+					class="img-fluid"
+					alt=""
+				/>
+				<a href="{{ url_for('fertilizer_recommendation') }}">
+					<div class="blog-info">
+						<h4>Fertilizer</h4>
+						<p class="mt-2">
+							Recommendation about the type of fertilizer best suited for the
+							particular soil and the recommended crop
+						</p>
+					</div>
+				</a>
+			</div>
+			<div class="col-lg-4 col-md-6 blog-right mb-lg-0 mb-sm-5 pb-lg-0 pb-md-5">
+				<img
+					src="{{ url_for('static', filename='images/s4.jpg') }}"
+					class="img-fluid"
+					alt=""
+				/>
+
+				<!-- <img src="images/s4.jpg" class="img-fliud" alt="" /> -->
+				<a href="{{ url_for('disease_prediction') }}">
+					<div class="blog-info">
+						<h4>Crop Disease</h4>
+						<p class="mt-2">
+							Predicting the name and causes of crop disease and suggestions to
+							cure it
+						</p>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
+</section> -->
+<!-- //Products & Services -->
+<h3 class="heading mb-sm-5 mb-4 text-center">Our Services</h3>
+
+<div class="container w-70" style="margin-bottom: 15px;display: flex; flex-direction: column; gap: 15px;">
+	<div class="card" style="height: 350px;">
+		<h2 class="card-header font-weight-bold">Crop</h2>
+		<div
+			class="card-body"
+			style="
+				background: url(../static/images/crop_background.jpg) center center
+					no-repeat;
+				background-size: cover;
+				display: flex;
+				height: 100%;
+				flex-direction: column;
+				justify-content: space-around;
+			"
+		>
+			<p class="text-dark font-weight-bold card-info-text"
+			style="
+			-webkit-text-stroke: 1.5px black;
+			-webkit-text-fill-color: transparent;
+			"
+			>
+				Recommendation about the type of crops to be cultivated which is best
+				suited for the respective conditions
+			</p>
+			<a href="{{ url_for('crop_recommend') }}" class="btn btn-success"
+			style="width: max-content;border: 2px solid white;box-shadow: 1px 1px 10px 1px black;"
+				>Crop Recommendation</a
+			>
+		</div>
+	</div>
+	<div class="card" style="height: 350px;">
+		<h2 class="card-header font-weight-bold">Fertilizer</h2>
+		<div
+			class="card-body"
+			style="
+				background: url(../static/images/s2.jpg) center center no-repeat;
+				background-size: cover;
+				display: flex;
+				height: 100%;
+				flex-direction: column;
+				justify-content: space-around;
+			"
+		>
+			<p class="text-dark font-weight-bold card-info-text" style="
+			-webkit-text-stroke: 1.5px black;
+			-webkit-text-fill-color: transparent;
+			">
+				Recommendation about the type of fertilizer best suited for the
+				particular soil and the recommended crop
+			</p>
+			<a href="{{ url_for('crop_recommend') }}" 
+			class="btn btn-success"
+			style="width: max-content;border: 2px solid white;box-shadow: 1px 1px 10px 1px black;"
+
+				>Fertilizer Recommendation</a
+			>
+		</div>
+	</div>
+	<div class="card" style="height: 350px;">
+		<h2 class="card-header font-weight-bold ">Disease</h2>
+		<div
+			class="card-body"
+			style="
+				background: url(../static/images/s4.jpg) center center no-repeat;
+				background-size: cover;
+				display: flex;
+				height: 100%;
+				flex-direction: column;
+				justify-content: space-around;
+			"
+		>
+			<p class="text-dark font-weight-bold card-info-text" style="
+			-webkit-text-stroke: 1.5px black;
+			-webkit-text-fill-color: transparent;
+			">
+				Predicting the name and causes of crop disease and suggestions to cure
+				it
+			</p>
+			<a href="{{ url_for('disease_prediction') }}"
+			 class="btn btn-success"
+			style="width: max-content;border: 2px solid white;box-shadow: 1px 1px 10px 1px black;"
+
+				>Disease Prediction</a
+			>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

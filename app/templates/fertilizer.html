@@ -1,0 +1,238 @@
+{% extends 'layout.html' %} {% block body %}
+
+<style>
+	html body {
+		background: url("../static/images/s2.jpg") center center no-repeat;
+		background-size: cover;
+	}
+	.input-control {
+		border: none;
+		border-bottom: 2px dashed black;
+		background-color: transparent;
+		outline: none;
+		caret-color: #89996d;
+		color: black;
+		font-size: 1.2rem;
+		padding: 10px;
+		width: 80%;
+	}
+	.form-group {
+		position: relative;
+	}
+	.form-group label {
+		font-size: 1.5rem;
+		font-weight: 500;
+		position: absolute;
+		bottom: 10px;
+		pointer-events: none;
+		user-select: none;
+		transition: all 0.2s ease-in-out;
+	}
+	.form-group.focus label {
+		transform: translateY(-20px) scale(0.8) translateX(-15%);
+	}
+	.form-group::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 0%;
+		width: 0;
+		height: 4px;
+		background-color: green;
+		width: 0%;
+		transition: all 0.2s ease-in-out;
+	}
+	.form-group.focus::after {
+		width: 100%;
+	}
+
+	.form-container {
+		border-radius: 25px;
+		width: 450px;
+		padding: 20px 15px 15px 15px;
+		margin: 0 auto;
+		margin-top: -10px;
+		margin-bottom: 10px;
+		background-color: rgba(255, 255, 255, 0.6);
+		box-shadow: 0px 0px 10px black;
+	}
+	.form-group .input-control {
+		width: 100%;
+	}
+</style>
+<!--Form Section-->
+<br /><br />
+<h3 style="text-align: center; margin-top: -30px; color: black">
+	<b>Get informed advice on fertilizer based on soil</b>
+</h3>
+<br />
+
+<div class="form-container">
+	<form
+		method="POST"
+		action="{{ url_for('fert_recommend') }}"
+		autocomplete="off"
+		autocapitalize="off"
+		autocorrect="off"
+	>
+		<div class="form-group">
+			<label for="Temparature" style="font-size: 17px"
+				><b>Temparature</b></label
+			>
+			<input
+				type="number"
+				class="input-control"
+				id="Temparature"
+				name="Temparature"
+				style="font-weight: bold"
+				required
+			/>
+		</div>
+
+		<div class="form-group">
+			<label for="Humidity" style="font-size: 17px"><b>Humidity</b></label>
+			<input
+				type="number"
+				class="input-control"
+				id="Humidity"
+				name="Humidity"
+				style="font-weight: bold"
+				required
+			/>
+		</div>
+
+		<div class="form-group">
+			<label for="Moisture" style="font-size: 17px"><b>Moisture</b></label>
+			<input
+				type="number"
+				class="input-control"
+				id="Moisture"
+				name="Moisture"
+				style="font-weight: bold"
+				required
+			/>
+		</div>
+		<div class="form-group">
+			<label for="Soil Type" style="font-size: 17px"><b>Soil Type</b></label>
+			<select
+				name="SoilType"
+				class="input-control"
+				id="SoilType"
+				style="font-weight: bold"
+				required
+			>
+				<option selected></option>
+				<option>Black</option>
+				<option>Clayey</option>
+				<option>Loamy</option>
+				<option>Red</option>
+				<option>Sandy</option>
+			</select>
+		</div>
+
+		<div class="form-group">
+			<label for="Crop Type" style="font-size: 17px"><b>Crop Type</b></label>
+			<select
+				name="CropType"
+				class="input-control"
+				id="CropType"
+				style="font-weight: bold"
+				required
+			>
+				<option selected></option>
+				<option>Barley</option>
+				<option>Cotton</option>
+				<option>Ground Nuts</option>
+				<option>Maize</option>
+				<option>Millets</option>
+				<option>Oil seeds</option>
+				<option>Paddy</option>
+				<option>Pulses</option>
+				<option>Sugarcane</option>
+				<option>Tobacco</option>
+				<option>Wheat</option>
+			</select>
+		</div>
+
+		<div class="form-group">
+			<label for="Nitrogen" style="font-size: 17px"><b>Nitrogen</b></label>
+			<input
+				type="number"
+				class="input-control"
+				id="Nitrogen"
+				name="Nitrogen"
+				style="font-weight: bold"
+				required
+			/>
+		</div>
+
+		<div class="form-group">
+			<label for="Potassium" style="font-size: 17px"><b>Potassium</b></label>
+			<input
+				type="number"
+				class="input-control"
+				id="Potassium"
+				name="Potassium"
+				style="font-weight: bold"
+				required
+			/>
+		</div>
+
+		<div class="form-group">
+			<label for="Phosphorous" style="font-size: 17px"
+				><b>Phosphorous</b></label
+			>
+			<input
+				type="number"
+				class="input-control"
+				id="Phosphorous"
+				name="Phosphorous"
+				style="font-weight: bold"
+				required
+			/>
+		</div>
+
+		<div class="d-flex justify-content-center">
+			<button
+				type="submit"
+				class="btn"
+				style="
+					color: white;
+					font-weight: bold;
+					width: 130px;
+					height: 50px;
+					border-radius: 12px;
+					font-size: 21px;
+					border: 5px green solid;
+					background-color: #191818;
+				"
+			>
+				Predict
+			</button>
+		</div>
+	</form>
+</div>
+<script>
+	let inputs = document.querySelectorAll(".input-control");
+	let isFocused = false;
+	inputs.forEach((input) => {
+		input.addEventListener("focus", function () {
+			input.closest(".form-group").classList.add("focus");
+			isFocused = true;
+		});
+		input.addEventListener("blur", function () {
+			if (input.value == "") {
+				input.closest(".form-group").classList.remove("focus");
+			}
+			isFocused = false;
+		});
+		input.addEventListener("input", () => {
+			if (input.value == "" && !isFocused) {
+				input.closest(".form-group").classList.remove("focus");
+			} else {
+				input.closest(".form-group").classList.add("focus");
+			}
+		});
+	});
+</script>
+{% endblock %}

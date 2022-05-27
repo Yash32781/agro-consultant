@@ -1,0 +1,294 @@
+# Importing essential libraries and modules
+
+from flask import Flask, render_template, request, Markup
+import numpy as np
+import pandas as pd
+from utils.disease import disease_dic
+from utils.fertilizer import fertilizer_dic
+import requests
+import config
+import pickle
+import io
+import torch
+from torchvision import transforms
+from PIL import Image
+from utils.model import ResNet9
+# ==============================================================================================
+
+# -------------------------LOADING THE TRAINED MODELS -----------------------------------------------
+
+# Loading plant disease classification model
+
+disease_classes = ['Apple___Apple_scab',
+                   'Apple___Black_rot',
+                   'Apple___Cedar_apple_rust',
+                   'Apple___healthy',
+                   'Blueberry___healthy',
+                   'Cherry_(including_sour)___Powdery_mildew',
+                   'Cherry_(including_sour)___healthy',
+                   'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot',
+                   'Corn_(maize)___Common_rust_',
+                   'Corn_(maize)___Northern_Leaf_Blight',
+                   'Corn_(maize)___healthy',
+                   'Grape___Black_rot',
+                   'Grape___Esca_(Black_Measles)',
+                   'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)',
+                   'Grape___healthy',
+                   'Orange___Haunglongbing_(Citrus_greening)',
+                   'Peach___Bacterial_spot',
+                   'Peach___healthy',
+                   'Pepper,_bell___Bacterial_spot',
+                   'Pepper,_bell___healthy',
+                   'Potato___Early_blight',
+                   'Potato___Late_blight',
+                   'Potato___healthy',
+                   'Raspberry___healthy',
+                   'Soybean___healthy',
+                   'Squash___Powdery_mildew',
+                   'Strawberry___Leaf_scorch',
+                   'Strawberry___healthy',
+                   'Tomato___Bacterial_spot',
+                   'Tomato___Early_blight',
+                   'Tomato___Late_blight',
+                   'Tomato___Leaf_Mold',
+                   'Tomato___Septoria_leaf_spot',
+                   'Tomato___Spider_mites Two-spotted_spider_mite',
+                   'Tomato___Target_Spot',
+                   'Tomato___Tomato_Yellow_Leaf_Curl_Virus',
+                   'Tomato___Tomato_mosaic_virus',
+                   'Tomato___healthy']
+
+disease_model_path = './models/plant-disease-model.pth'
+disease_model = ResNet9(3, len(disease_classes))
+disease_model.load_state_dict(torch.load(
+    disease_model_path, map_location=torch.device('cpu')))
+disease_model.eval()
+
+
+# Loading crop recommendation model
+
+crop_recommendation_model_path = './models/random_forest_crop_prediction.pkl'
+crop_recommendation_model = pickle.load(
+    open(crop_recommendation_model_path, 'rb'))
+
+fert_recommendation_model_path = './models/random_forest_fertilizer_recommedation.pkl'
+fert_recommendation_model = pickle.load(
+    open(fert_recommendation_model_path, 'rb'))
+
+
+# =========================================================================================
+
+# Custom functions for calculations
+
+
+def weather_fetch(city_name):
+    """
+    Fetch and returns the temperature and humidity of a city
+    :params: city_name
+    :return: temperature, humidity
+    """
+    api_key = config.weather_api_key
+    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+
+    complete_url = base_url + "appid=" + api_key + "&q=" + city_name
+    response = requests.get(complete_url)
+    x = response.json()
+
+    if x["cod"] != "404":
+        y = x["main"]
+
+        temperature = round((y["temp"] - 273.15), 2)
+        humidity = y["humidity"]
+        return temperature, humidity
+    else:
+        return None
+
+
+def predict_image(img, model=disease_model):
+    """
+    Transforms image to tensor and predicts disease label
+    :params: image
+    :return: prediction (string)
+    """
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.ToTensor(),
+    ])
+    image = Image.open(io.BytesIO(img))
+    img_t = transform(image)
+    img_u = torch.unsqueeze(img_t, 0)
+
+    # Get predictions from model
+    yb = model(img_u)
+    # Pick index with highest probability
+    _, preds = torch.max(yb, dim=1)
+    prediction = disease_classes[preds[0].item()]
+    # Retrieve the class label
+    return prediction
+
+# ===============================================================================================
+# ------------------------------------ FLASK APP -------------------------------------------------
+
+
+app = Flask(__name__)
+
+# render home page
+
+
+@ app.route('/')
+def home():
+    title = 'Harvestify - Home'
+    return render_template('index.html', title=title)
+
+# render crop recommendation form page
+
+
+@ app.route('/crop-recommend')
+def crop_recommend():
+    title = 'Harvestify - Crop Recommendation'
+    return render_template('crop.html', title=title)
+
+# render fertilizer recommendation form page
+
+
+@ app.route('/fertilizer')
+def fertilizer_recommendation():
+    title = 'Harvestify - Fertilizer Suggestion'
+
+    return render_template('fertilizer.html', title=title)
+
+# render disease prediction input page
+
+
+
+
+# ===============================================================================================
+
+# RENDER PREDICTION PAGES
+
+# render crop recommendation result page
+
+
+@ app.route('/crop-predict', methods=['POST'])
+def crop_prediction():
+    title = 'Harvestify - Crop Recommendation'
+
+    if request.method == 'POST':
+        N = int(request.form['nitrogen'])
+        P = int(request.form['phosphorous'])
+        K = int(request.form['pottasium'])
+        ph = float(request.form['ph'])
+        rainfall = float(request.form['rainfall'])
+
+        # state = request.form.get("stt")
+        city = request.form.get("city")
+
+        if weather_fetch(city) != None:
+            temperature, humidity = weather_fetch(city)
+            data = np.array([[N, P, K, temperature, humidity, ph, rainfall]])
+            my_prediction = crop_recommendation_model.predict(data)
+            final_prediction = my_prediction[0]
+
+            return render_template('crop-result.html', prediction=final_prediction, title=title)
+
+        else:
+
+            return render_template('try_again.html', title=title)
+
+
+@ app.route('/fertilizer-predict', methods=['POST'])
+def fert_recommend():
+    title = 'Harvestify - Fertilizer Suggestion'
+   
+    temparature = str(request.form['Temparature'])
+    humidity = str(request.form['Humidity'])
+    moisture = str(request.form['Moisture'])
+    soil_name = str(request.form['SoilType'])
+    crop_name = str(request.form['CropType'])
+    N = int(request.form['Nitrogen'])
+    P = int(request.form['Phosphorous'])
+    K = int(request.form['Potassium'])
+
+    if soil_name=="Black":
+        soil_number = 0
+    if soil_name=="Clayey":
+        soil_number = 1
+    if soil_name=="Loamy":
+        soil_number = 2
+    if soil_name=="Red":
+        soil_number = 3
+    if soil_name=="Sandy":
+        soil_number = 4
+
+    if crop_name=="Barley":
+        crop_number = 0
+    if crop_name=="Cotton":
+        crop_number = 1
+    if crop_name=="Ground Nuts":
+        crop_number = 2
+    if crop_name=="Maize":
+        crop_number = 3
+    if crop_name=="Millets":
+        crop_number = 4
+    if crop_name=="Oil seeds":
+        crop_number = 5
+    if crop_name=="Paddy":
+        crop_number = 6
+    if crop_name=="Pulses":
+        crop_number = 7
+    if crop_name=="Sugarcane":
+        crop_number = 8
+    if crop_name=="Tobacco":
+        crop_number = 9
+    if crop_name=="Wheat":
+        crop_number = 10
+
+
+    print(temparature, humidity , moisture, soil_number, crop_number,N, K, P)
+    my_prediction_result = fert_recommendation_model.predict([[temparature, humidity , moisture, soil_number, crop_number,N, K, P]])
+    final_prediction_result = my_prediction_result[0]
+    
+    if final_prediction_result==0:
+        fert_name = '10-26-26 - GROMOR'
+    if final_prediction_result==1:
+        fert_name = '14-35-14 - GROMOR'
+    if final_prediction_result==2:
+        fert_name = '17-17-17 - MANGALA'
+    if final_prediction_result==3:
+        fert_name = '20-20 - MANGALA'
+    if final_prediction_result==4:
+        fert_name = '28-28 - GROMOR'
+    if final_prediction_result==5:
+        fert_name = 'DAP - Diammonium phosphate'
+    if final_prediction_result==6:
+        fert_name = 'UREA'
+
+    response = Markup(str(fertilizer_dic[fert_name]))
+    return render_template('fertilizer-result.html', recommendation=response, title=title)
+
+
+@app.route('/disease-predict', methods=['GET', 'POST'])
+def disease_prediction():
+    title = 'Harvestify - Disease Detection'
+
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return redirect(request.url)
+        file = request.files.get('file')
+        if not file:
+            return render_template('disease.html', title=title)
+        try:
+            img = file.read()
+
+            prediction = predict_image(img)
+
+            prediction = Markup(str(disease_dic[prediction]))
+            return render_template('disease-result.html', prediction=prediction, title=title)
+        except:
+            pass
+    return render_template('disease.html', title=title)
+
+
+# ===============================================================================================
+if __name__ == '__main__':
+    app.run(debug=True)
